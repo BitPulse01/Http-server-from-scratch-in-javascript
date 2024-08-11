@@ -21,8 +21,15 @@ const server = net.createServer((socket) => {
         
         if (ENDPOINTS.includes(RequestData['url_path'])) {
             message = "HTTP/1.1 200 OK\r\n\r\n";
-            console.log('sent');
-        } else{
+        }
+        
+        if (RequestData['url_path'].toString().startsWith("/echo/")){
+            let echoMessage = RequestData['url_path'].toString().split("/echo/")[1].toString();
+            
+            message = `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${echoMessage.length}\r\n\r\n${echoMessage}`
+        }
+
+        else{
             message = "HTTP/1.1 404 Not Found\r\n\r\n";
         }
         
