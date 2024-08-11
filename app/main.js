@@ -1,5 +1,5 @@
 const net = require("net");
-const { measureMemory } = require("vm");
+const files_handler = require("fs");
 
 // You can use print statements as follows for debugging, they'll be visible when running tests.
 console.log("Logs from your program will appear here!");
@@ -12,10 +12,10 @@ const server = net.createServer((socket) => {
         let Request_Header = Request[1].split(": ");
         
         let RequestData = {
-            "method":data[0],
-            "url_path":data[1],
-            "HTTP_version":data[2],
-            "User-agent":Request_Header[1],
+            "method" : Request_Info[0].toString(),
+            "url_path" : Request_Info[1].toString(),
+            "HTTP_version" : Request_Info[2].toString(),
+            "User-agent" : Request_Header[1].toString(),
         }
         
         if (RequestData['url_path'] == "/") {
@@ -40,7 +40,25 @@ const server = net.createServer((socket) => {
             console.log(message);
             socket.write(message);
 
-        } else{
+        } else if (RequestData['url_path'].toString().startsWith('/files/')){
+            let File_Path = RequestData['url_path'].split("/files/")[1]
+            
+            files_handler.readFile(`j:/projects/JSProjects/9.HTTP_server_from_scratch/codecrafters-http-server-javascript/app/${File_Path}`, (err, content) => {
+                if (err){
+                    let message = "HTTP/1.1 404 Not Found\r\n\r\n";
+            
+                    console.log(message);
+                    socket.write(message);
+                } else {
+                    let message = `HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: ${data.length}\r\n\r\n${content}`;
+
+                    console.log(content.toString());
+                    socket.write(message);
+                }
+            });
+
+
+        } else {
             let message = "HTTP/1.1 404 Not Found\r\n\r\n";
             
             console.log(message);
